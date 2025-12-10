@@ -67,3 +67,40 @@ export async function getUserMessages(token, id) {
     console.error("Error", error);
   }
 }
+
+// Send a new message
+export async function sendMessage(token, messageData) {
+  try {
+    const response = await fetch("http://localhost:3000/api/messages/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(messageData),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error", error);
+  }
+}
+
+// check to see if a username exists
+export async function checkUsernameExists(token, username) {
+  try {
+    const response = await fetch(
+      `http://localhost:3000/api/users/exists/${username}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return await response.json();
+  } catch (error) {
+    console.error("Error", error);
+  }
+}
