@@ -1,6 +1,6 @@
 // This file contains all the services related to API calls
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const API_BASE = "chatty-production-9838.up.railway.app";
 
 // Login a user
 // details will include an email and password
@@ -125,16 +125,13 @@ export async function sendMessage(token, messageData) {
 // check to see if a username exists
 export async function checkUsernameExists(token, username) {
   try {
-    const response = await fetch(
-      `${API_BASE}/api/users/exists/${username}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await fetch(`${API_BASE}/api/users/exists/${username}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return await response.json();
   } catch (error) {
     console.error("Error", error);
