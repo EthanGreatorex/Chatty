@@ -33,7 +33,13 @@ passport.use(
 );
 
 // Configure middleware
-app.use(cors()); // This allows file requests from different origins
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/users", userRoutes);
