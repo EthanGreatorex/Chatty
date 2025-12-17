@@ -180,7 +180,7 @@ export default function Chats() {
         <div className="flex overflow-hidden relative">
           {/* Sidebar */}
           <div className={`w-64 md:w-1/4 fixed md:relative top-0 left-0 h-full bg-black transform ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300 ease-in-out z-50`}>
-            <header className="p-5 border flex justify-between items-center text-white text-center">
+            <header className="p-5 flex justify-between items-center text-white text-center">
               <h1 className="text-2xl font-semibold text-white">Chatty</h1>
               <button onClick={() => setIsMenuOpen(false)} className="md:hidden text-white">
                 <IoClose size={24} />
