@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { GiHamburgerMenu } from "react-icons/gi";
+import { IoClose } from "react-icons/io5";
 import {
   getUserMessages,
   checkUsernameExists,
@@ -18,6 +20,7 @@ export default function Chats() {
   const [chatHistory, setChatHistory] = useState([]);
   const [recentChats, setRecentChats] = useState([]);
   const [userMap, setUserMap] = useState({});
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // On page load, if the user is not logged in, redirect to the home page
   useEffect(() => {
@@ -173,11 +176,15 @@ export default function Chats() {
 
   return (
     <>
-      <div className="main flex flex-col  h-screen">
-        <div className="flex  overflow-hidden">
-          <div className="w-1/4 ">
-            <header className="p-5  border- flex justify-between items-center text-white text-center">
+      <div className="main flex flex-col h-screen">
+        <div className="flex overflow-hidden relative">
+          {/* Sidebar */}
+          <div className={`w-64 md:w-1/4 fixed md:relative top-0 left-0 h-full bg-neutral-800 transform ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300 ease-in-out z-50`}>
+            <header className="p-5 border flex justify-between items-center text-white text-center">
               <h1 className="text-2xl font-semibold text-white">Chatty</h1>
+              <button onClick={() => setIsMenuOpen(false)} className="md:hidden text-white">
+                <IoClose size={24} />
+              </button>
             </header>
 
             <div className="overflow-y-auto h-screen p-3 mb-9 pb-20">
@@ -198,10 +205,11 @@ export default function Chats() {
                           });
                           setRecipientId(chat.userId);
                           fetchChatHistory(chat.userId);
+                          setIsMenuOpen(false); // Close menu on mobile after selecting
                         }}
                       >
-                        <div className="d-flex ">
-                          <div className="w-12 h-12  rounded-full mr-3">
+                        <div className="d-flex">
+                          <div className="w-12 h-12 rounded-full mr-3">
                             <img
                               src={
                                 chat.profilePicture
@@ -227,8 +235,15 @@ export default function Chats() {
             </div>
           </div>
 
-          <div className="flex-1">
-            <header className=" p-4 text-gray-900 flex items-center justify-between gap-4">
+          {/* Backdrop for mobile menu */}
+          {isMenuOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setIsMenuOpen(false)}></div>}
+
+          {/* Main chat area */}
+          <div className="flex-1 w-full md:w-auto">
+            <header className="p-4 text-gray-900 flex items-center justify-between gap-4">
+              <button onClick={() => setIsMenuOpen(true)} className="md:hidden text-white mr-2">
+                <GiHamburgerMenu size={24} />
+              </button>
               <h1 className="text-2xl font-semibold text-neutral-100">
                 {currentChat ? currentChat.name : "Select a chat"}
               </h1>
@@ -274,7 +289,7 @@ export default function Chats() {
               ))}
             </div>
 
-            <footer className=" p-4 absolute bottom-0 w-3/4">
+            <footer className=" p-4 absolute bottom-0 w-full md:w-3/4">
               <div className="flex items-center gap-2">
                 <input
                   type="text"
