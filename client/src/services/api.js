@@ -55,7 +55,7 @@ export async function getUserDetails(token, id) {
 // Get user by ID
 export async function getUserById(token, id) {
   try {
-    const response = await fetch(`http://localhost:3000/api/users/me/${id}`, {
+    const response = await fetch(`https://chatty-production-9838.up.railway.app/api/users/me/${id}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
