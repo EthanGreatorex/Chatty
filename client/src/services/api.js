@@ -1,10 +1,12 @@
 // This file contains all the services related to API calls
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+
 // Login a user
 // details will include an email and password
 export async function loginUser(details) {
   try {
-    const response = await fetch("http://localhost:3000/api/users/login", {
+    const response = await fetch(`${API_BASE}/api/users/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -18,10 +20,10 @@ export async function loginUser(details) {
 }
 
 // Register a new user
-// details will include a username, email and password
+// details will include a username, email, password, and optionally profilePicture as URL
 export async function registerUser(details) {
   try {
-    const response = await fetch("http://localhost:3000/api/users/register", {
+    const response = await fetch(`${API_BASE}/api/users/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -36,6 +38,22 @@ export async function registerUser(details) {
 
 // Get user details
 export async function getUserDetails(token, id) {
+  try {
+    const response = await fetch(`${API_BASE}/api/users/me/${id}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error", error);
+  }
+}
+
+// Get user by ID
+export async function getUserById(token, id) {
   try {
     const response = await fetch(`http://localhost:3000/api/users/me/${id}`, {
       method: "POST",
@@ -52,9 +70,8 @@ export async function getUserDetails(token, id) {
 
 // Get user messages
 export async function getUserMessages(token, id) {
-  console.log("API Call - getUserMessages with token:", token, "and id:", id);
   try {
-    const response = await fetch(`http://localhost:3000/api/messages/${id}`, {
+    const response = await fetch(`${API_BASE}/api/messages/${id}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -68,10 +85,29 @@ export async function getUserMessages(token, id) {
   }
 }
 
+// Get messages between two users
+export async function getMessagesBetweenUsers(token, userOneID, userTwoID) {
+  try {
+    const response = await fetch(
+      `${API_BASE}/api/messages/between/${userOneID}/${userTwoID}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return await response.json();
+  } catch (error) {
+    console.error("Error", error);
+  }
+}
+
 // Send a new message
 export async function sendMessage(token, messageData) {
   try {
-    const response = await fetch("http://localhost:3000/api/messages/", {
+    const response = await fetch(`${API_BASE}/api/messages/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -90,7 +126,7 @@ export async function sendMessage(token, messageData) {
 export async function checkUsernameExists(token, username) {
   try {
     const response = await fetch(
-      `http://localhost:3000/api/users/exists/${username}`,
+      `${API_BASE}/api/users/exists/${username}`,
       {
         method: "POST",
         headers: {

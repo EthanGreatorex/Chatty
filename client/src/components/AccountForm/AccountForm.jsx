@@ -8,6 +8,9 @@ export default function AccountForm({ onBack = () => {} }) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [profilePicture, setProfilePicture] = useState("");
+
+  const IMG_API_KEY = "7d793a7ba60c9baf15a0b08e0c1a1ee0";
 
   const navigate = useNavigate();
 
@@ -15,14 +18,40 @@ export default function AccountForm({ onBack = () => {} }) {
     navigate("/chats");
   }
 
+  async function handleFileChange(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append("key", IMG_API_KEY);
+      formData.append("image", file);
+      try {
+        const response = await fetch("https://api.imgbb.com/1/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await response.json();
+        if (data.success) {
+          setProfilePicture(data.data.url);
+        } else {
+          console.error("Upload failed:", data);
+        }
+      } catch (error) {
+        console.error("Upload error:", error);
+      }
+    }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (isRegister) {
       // Register a new user
       try {
-        console.log(username, email, password);
-        const response = await registerUser({ username, email, password });
-        console.log("Registration Response:", response);
+        const response = await registerUser({
+          username,
+          email,
+          password,
+          profilePicture,
+        });
         // Store the token in local storage
         if (response.token) {
           localStorage.setItem("token", response.token);
@@ -39,9 +68,7 @@ export default function AccountForm({ onBack = () => {} }) {
     } else {
       // Login an existing user
       try {
-        console.log(email, password);
         const response = await loginUser({ username, email, password });
-        console.log("Login Response:", response);
         // Store the token in local storage
         if (response.token) {
           localStorage.setItem("token", response.token);
@@ -74,7 +101,7 @@ export default function AccountForm({ onBack = () => {} }) {
         onSubmit={handleSubmit}
         onClick={(e) => e.stopPropagation()}
       >
-        <button type="button" className=" text-white" onClick={onBack}>
+        <button type="button" className="close-btn" onClick={onBack}>
           x
         </button>
         {isRegister && (
@@ -90,7 +117,10 @@ export default function AccountForm({ onBack = () => {} }) {
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <g id="Layer_3" data-name="Layer 3">
-                  <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zM11 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1zm2 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z"></path>
+                  <path
+                    fill="white"
+                    d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zM11 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1zm2 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z"
+                  ></path>
                 </g>
               </svg>
               <input
@@ -126,6 +156,31 @@ export default function AccountForm({ onBack = () => {} }) {
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
+        {isRegister && (
+          <>
+            <div className="flex-column">
+              <label>Profile Picture </label>
+            </div>
+            <div className="inputForm">
+              <svg
+                height="20"
+                viewBox="0 0 24 24"
+                width="20"
+                className="field-icon"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="m12 12c2.209137 0 4-1.790863 4-4s-1.790863-4-4-4-4 1.790863-4 4 1.790863 4 4 4zm0-6c1.1045695 0 2 .8954305 2 2s-.8954305 2-2 2-2-.8954305-2-2 .8954305-2 2-2zm0 8c-4.418278 0-8 3.581722-8 8h2c0-3.3137085 2.6862915-6 6-6s6 2.6862915 6 6h2c0-4.418278-3.581722-8-8-8z"></path>
+              </svg>
+              <input
+                type="file"
+                className="input p-2"
+                accept=".jpg, .jpeg, .png"
+                placeholder="Upload profile picture"
+                onChange={handleFileChange}
+              />
+            </div>
+          </>
+        )}
 
         <div className="flex-column">
           <label>Password </label>

@@ -1,10 +1,8 @@
-
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-// Get messages between users
+// Get messages for a user
 export async function getMessages(req, res) {
-  console.log('Hitting message endpoing with id:', req.params.id);
   // extract user ID from request parameters
   const userId = parseInt(req.params.id);
   // fetch messages where the user is either the sender or receiver
@@ -12,7 +10,22 @@ export async function getMessages(req, res) {
     where: { OR: [{ fromUID: userId }, { toUID: userId }] },
     include: { from: true, to: true },
   });
-  console.log('hi');
+  res.json(messages);
+}
+
+// Get messages between two users
+export async function getMessagesBetweenUsers(req, res) {
+  const id1 = parseInt(req.params.id1);
+  const id2 = parseInt(req.params.id2);
+  const messages = await prisma.message.findMany({
+    where: {
+      OR: [
+        { fromUID: id1, toUID: id2 },
+        { fromUID: id2, toUID: id1 },
+      ],
+    },
+    include: { from: true, to: true },
+  });
   res.json(messages);
 }
 

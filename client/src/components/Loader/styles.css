@@ -5,7 +5,7 @@
 
 .star {
   opacity: 0;
-  fill: #e0b0ff;
+  fill: #ffffff;
   animation: loader 2s infinite alternate;
 }
 

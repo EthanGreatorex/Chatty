@@ -1,52 +1,92 @@
 import { useEffect, useState } from "react";
 import {
-  getUserDetails,
   getUserMessages,
   checkUsernameExists,
+  sendMessage,
+  getMessagesBetweenUsers,
+  getUserById,
 } from "../services/api.js";
 
 import "./Chats.css";
 
 export default function Chats() {
-  const [userDetails, setUserDetails] = useState(null);
   const [showCompose, setShowCompose] = useState(false);
   const [composeUsername, setComposeUsername] = useState("");
+  const [recipientId, setRecipientId] = useState(null);
   const [currentChat, setCurrentChat] = useState(null);
   const [messageText, setMessageText] = useState("");
-  // On page load, fetch the user's profile details
+  const [chatHistory, setChatHistory] = useState([]);
+  const [recentChats, setRecentChats] = useState([]);
+  const [userMap, setUserMap] = useState({});
+
+  // On page load, if the user is not logged in, redirect to the home page
   useEffect(() => {
-    async function fetchUserDetails() {
-      const token = localStorage.getItem("token");
-      const id = localStorage.getItem("id");
-      if (token && id) {
-        try {
-          const userDetails = await getUserDetails(token, id);
-          setUserDetails(userDetails);
-        } catch (error) {
-          console.error("Error fetching user details:", error);
-        }
-      }
+    const token = localStorage.getItem("token");
+    const id = localStorage.getItem("id");
+    if (!token || !id) {
+      window.location.href = "/";
     }
-    fetchUserDetails();
   }, []);
 
-  // On page load, fetch the user's messages
+  // On page load, fetch the user's messages, this will allow us to display recent chats
   useEffect(() => {
     async function fetchUserMessages() {
       const token = localStorage.getItem("token");
       const id = localStorage.getItem("id");
-      console.log("Fetching messages with token:", token, "and id:", id);
+
       if (token && id) {
         try {
           const userMessages = await getUserMessages(token, id);
-          console.log("User Messages:", userMessages);
+          // Process messages to get unique other UIDs
+          const myId = parseInt(id);
+          const otherUIDs = [
+            ...new Set(
+              userMessages
+                .map((msg) => (msg.fromUID === myId ? msg.toUID : msg.fromUID))
+                .filter((uid) => uid !== myId)
+            ),
+          ];
+
+          // Fetch user details for each other UID if not already in map
+          const newUserMap = { ...userMap };
+          const fetchPromises = otherUIDs.map(async (uid) => {
+            if (!newUserMap[uid]) {
+              const userDetails = await getUserById(token, uid);
+              if (userDetails) {
+                newUserMap[uid] = userDetails;
+              }
+            }
+          });
+          await Promise.all(fetchPromises);
+          setUserMap(newUserMap);
+
+          // Create recent chats
+          const chats = otherUIDs.map((uid) => {
+            const messagesWithUser = userMessages.filter(
+              (msg) =>
+                (msg.fromUID === myId && msg.toUID === uid) ||
+                (msg.fromUID === uid && msg.toUID === myId)
+            );
+            const lastMsg = messagesWithUser.sort(
+              (a, b) => new Date(b.sentDt) - new Date(a.sentDt)
+            )[0];
+            return {
+              userId: uid,
+              username: newUserMap[uid]?.username || "Unknown",
+              email: newUserMap[uid]?.email || "",
+              profilePicture: newUserMap[uid]?.profilePicture,
+              lastMessage: lastMsg?.messageText || "",
+              lastMessageTime: lastMsg?.sentDt || "",
+            };
+          });
+          setRecentChats(chats);
         } catch (error) {
           console.error("Error fetching user messages:", error);
         }
       }
     }
     fetchUserMessages();
-  }, []);
+  }, [userMap]);
 
   // Open compose modal
   function openCompose() {
@@ -66,7 +106,7 @@ export default function Chats() {
       return;
     }
 
-    console.log("Username exists:", usernameExists);
+    setRecipientId(usernameExists.id);
 
     if (!composeUsername) return;
     setCurrentChat({
@@ -76,43 +116,120 @@ export default function Chats() {
     });
     setShowCompose(false);
     setMessageText("");
+
+    // Fetch the chat history with this user
+    fetchChatHistory(usernameExists.id);
+  }
+
+  // Function to fetch chat history with a specific user
+  async function fetchChatHistory(recipientId) {
+    const token = localStorage.getItem("token");
+    const id = localStorage.getItem("id");
+    try {
+      const messages = await getMessagesBetweenUsers(token, id, recipientId);
+      setChatHistory(messages);
+    } catch (error) {
+      console.error("Error fetching chat history:", error);
+    }
   }
 
   // Send message for current chat
   async function handleSend() {
     const token = localStorage.getItem("token");
-    const fromId = localStorage.getItem("id");
+    const messageData = {
+      fromUID: parseInt(localStorage.getItem("id")),
+      toUID: recipientId,
+      messageText: messageText,
+    };
+    try {
+      sendMessage(token, messageData);
+      setMessageText("");
+      // Refresh chat history
+      fetchChatHistory(recipientId);
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   }
+
+  // If a chat is currently selected, re-fetch chat history every 5 seconds to simulate real-time updates
+  useEffect(() => {
+    let interval;
+    if (currentChat && recipientId) {
+      interval = setInterval(() => {
+        fetchChatHistory(recipientId);
+      }, 2000);
+    }
+
+    return () => clearInterval(interval);
+  }, [currentChat, recipientId]);
+
+  // Auto scroll to bottom of chat on new message
+  useEffect(() => {
+    const chatContainer = document.querySelector(".chat-container");
+    if (chatContainer) {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+  }, [chatHistory]);
 
   return (
     <>
-      <div className="main flex flex-col  h-screen bg-neutral-900">
+      <div className="main flex flex-col  h-screen">
         <div className="flex  overflow-hidden">
-          <div className="w-1/4 bg-transparent border-r border-purple-800">
-            <header className="p-5 border-b border-purple-800 flex justify-between items-center bg-purple-800 text-white">
+          <div className="w-1/4 ">
+            <header className="p-5  border- flex justify-between items-center text-white text-center">
               <h1 className="text-2xl font-semibold text-white">Chatty</h1>
             </header>
 
             <div className="overflow-y-auto h-screen p-3 mb-9 pb-20">
-              <div className="flex items-center mb-4 cursor-pointer hover:bg-purple-800 p-2 rounded-md">
-                <div className="w-12 h-12 bg-gray-300 rounded-full mr-3">
-                  <img
-                    src="https://placehold.co/200x/ffa8e4/ffffff.svg?text=ʕ•́ᴥ•̀ʔ&font=Lato"
-                    alt="User Avatar"
-                    className="w-12 h-12 rounded-full"
-                  />
-                </div>
+              <div className="flex items-center mb-4 cursor-pointer p-2 rounded-md">
                 <div className="flex-1">
-                  <h2 className="text-lg font-semibold text-white">Bob</h2>
-                  <p className="text-gray-300">Hoorayy!!</p>
+                  <div className="text-neutral-200 font-medium mb-1">
+                    Recent Chats
+                  </div>
+                  <div>
+                    {recentChats.map((chat, index) => (
+                      <div
+                        key={index}
+                        className="p-2 hover:bg-neutral-700 rounded-md cursor-pointer"
+                        onClick={() => {
+                          setCurrentChat({
+                            name: chat.username,
+                            email: chat.email,
+                          });
+                          setRecipientId(chat.userId);
+                          fetchChatHistory(chat.userId);
+                        }}
+                      >
+                        <div className="d-flex ">
+                          <div className="w-12 h-12  rounded-full mr-3">
+                            <img
+                              src={
+                                chat.profilePicture
+                                  ? chat.profilePicture
+                                  : "https://placehold.co/200x/FFFFFF/000000.svg?text=(•_•)&font=Lato"
+                              }
+                              alt="User Avatar"
+                              className="w-12 h-12 rounded-full"
+                            />
+                          </div>
+                          <div className="text-neutral-200 font-medium">
+                            {chat.username}
+                          </div>
+                          <div className="text-neutral-400 text-sm truncate">
+                            {chat.lastMessage}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="flex-1">
-            <header className="bg-transparent p-4 text-gray-700 flex items-center justify-between gap-4">
-              <h1 className="text-2xl font-semibold text-white">
+            <header className=" p-4 text-gray-900 flex items-center justify-between gap-4">
+              <h1 className="text-2xl font-semibold text-neutral-100">
                 {currentChat ? currentChat.name : "Select a chat"}
               </h1>
               <div className="flex items-center gap-2">
@@ -122,9 +239,42 @@ export default function Chats() {
               </div>
             </header>
 
-            <div className="h-screen overflow-y-auto p-4 pb-36"></div>
+            <div
+              className="h-screen overflow-y-auto p-4 pb-36 chat-container"
+              style={{ scrollBehavior: "smooth" }}
+            >
+              {/* received messages on the left side and sent messages on the right side */}
+              {chatHistory.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`mb-4 flex ${
+                    msg.fromUID === parseInt(localStorage.getItem("id"))
+                      ? "justify-end"
+                      : "justify-start"
+                  }`}
+                >
+                  <div className=" text-neutral-900 p-3 rounded-lg max-w-xs">
+                    <p
+                      className={`p-3 rounded-lg ${
+                        msg.fromUID === parseInt(localStorage.getItem("id"))
+                          ? "bg-neutral-700 text-white"
+                          : "bg-neutral-100 text-black"
+                      }`}
+                    >
+                      {msg.messageText}
+                    </p>
+                    <div className="text-gray-500 text-xs mt-1 ml-2">
+                      {msg.fromUID === parseInt(localStorage.getItem("id"))
+                        ? "You"
+                        : currentChat.name}{" "}
+                      - {new Date(msg.sentDt).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-            <footer className="bg-transparent p-4 absolute bottom-0 w-3/4">
+            <footer className=" p-4 absolute bottom-0 w-3/4">
               <div className="flex items-center gap-2">
                 <input
                   type="text"
@@ -136,7 +286,7 @@ export default function Chats() {
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
                   disabled={!currentChat}
-                  className="w-full bg-black border-none p-2 rounded-md border focus:outline-none focus:border-purple-500 text-white"
+                  className="w-full bg-transparent  p-2 rounded-md focus:outline-none focus:border-orange-500 text-white"
                 />
                 <button
                   onClick={handleSend}
@@ -150,32 +300,31 @@ export default function Chats() {
           </div>
         </div>
       </div>
-      {/* Compose Modal */}
+
       {showCompose && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-neutral-900 rounded-md p-6 w-96">
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center">
+          <div className="bg-black rounded-md p-6 w-96">
             <h2 className="text-lg font-semibold text-white mb-3">
               Compose New Message
             </h2>
-            <label className="text-sm text-gray-300">Recipient Username</label>
+            <label className="text-sm text-neutral-300">
+              Recipient Username
+            </label>
             <input
-              type="email"
+              type="text"
               value={composeUsername}
               onChange={(e) => setComposeUsername(e.target.value)}
               placeholder="supercooluser"
-              className="w-full bg-black border-none p-2 rounded-md my-2 text-white"
+              className="w-full bg-transparent p-2 rounded-md my-2 text-white focus:outline-none focus:border-orange-500"
             />
             <div className="flex justify-end gap-2 mt-4">
               <button
                 onClick={() => setShowCompose(false)}
-                className="px-3 py-1 rounded-md border border-gray-600 text-white"
+                className=" btn rounded-md  text-gray-900"
               >
                 Cancel
               </button>
-              <button
-                onClick={startChatWithUsername}
-                className="btn"
-              >
+              <button onClick={startChatWithUsername} className="btn">
                 Next
               </button>
             </div>

@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3000;
 // Configure authentication
 const options = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: "supersecretkey",
+  secretOrKey: process.env.JWT_SECRET || "supersecretkey",
 };
 
 passport.use(

@@ -13,7 +13,7 @@ export default function Home() {
   }
   return (
     <>
-      <div className="main flex flex-col justify-center items-center h-screen bg-neutral-900">
+      <div className="main flex flex-col justify-center items-center h-screen bg-white">
         <div className="hero text-center">
           <div className="flex justify-center gap-4 mt-4">
             <FaGithub
@@ -21,10 +21,17 @@ export default function Home() {
               size={30}
               onClick={() => window.open("https://github.com/EthanGreatorex")}
             />
+            <FaLinkedin
+              className="icon mt-2"
+              size={30}
+              onClick={() =>
+                window.open("https://uk.linkedin.com/in/ethan-greatorex")
+              }
+            />
           </div>
           <h1 className="text-5xl text-white font-bold">Welcome to Chatty</h1>
           <Loader />
-          <h3 className="text-gray-500 text-2xl mb-6">
+          <h3 className="text-neutral-500 text-2xl mb-6">
             Login or Register to start chatting!
           </h3>{" "}
           <button className="btn" onClick={() => setShowForm(true)}>

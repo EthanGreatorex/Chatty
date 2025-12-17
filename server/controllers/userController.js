@@ -8,14 +8,13 @@ const prisma = new PrismaClient();
 // Register a new user
 export async function register(req, res) {
   // extract user details from request body
-  const { username, email, password } = req.body;
+  const { username, email, password, profilePicture } = req.body;
   // hash the password before storing
   const hash = await bcrypt.hash(password, 10);
-  console.log(hash);
-  console.log(typeof hash);
+
   // create a new user record in the database
   const user = await prisma.user.create({
-    data: { username, email, password: hash },
+    data: { username, email, password: hash, profilePicture },
   });
 
   // generate a JWT token for the authenticated user
@@ -55,11 +54,10 @@ export async function getProfile(req, res) {
 
 // check if a user exists
 export async function userExists(req, res) {
-  console.log(
-    "Hitting user exists endpoint with username:",
-    req.params.username
-  );
   const username = req.params.username;
   const user = await prisma.user.findUnique({ where: { username: username } });
-  res.json({ exists: !!user });
+  // Return true if user exists, fal  se otherwise
+  const exists = user ? true : false;
+  // If the user exists, also return their id
+  res.json({ exists, id: user ? user.id : null });
 }
