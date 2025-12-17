@@ -125,7 +125,6 @@ export default function Chats() {
   }
 
   // Function to fetch chat history with a specific user
-  // Function to fetch chat history with a specific user
   async function fetchChatHistory(recipientId) {
     const token = localStorage.getItem("token");
     const id = localStorage.getItem("id");
@@ -136,6 +135,7 @@ export default function Chats() {
       console.error("Error fetching chat history:", error);
     }
   }
+
   // Send message for current chat
   async function handleSend() {
     const token = localStorage.getItem("token");
@@ -154,14 +154,12 @@ export default function Chats() {
     }
   }
 
-  // If a chat is currently selected, re-fetch chat history every 10 seconds to simulate real-time updates
+  // If a chat is currently selected, re-fetch chat history every 5 seconds to simulate real-time updates
   useEffect(() => {
     let interval;
     if (currentChat && recipientId) {
       interval = setInterval(() => {
-        if (document.hasFocus()) {
-          fetchChatHistory(recipientId);
-        }
+        fetchChatHistory(recipientId);
       }, 5000);
     }
 
@@ -178,7 +176,8 @@ export default function Chats() {
 
   return (
     <>
-      <div className="flex overflow-hidden relative">
+      <div className="main flex flex-col h-screen">
+        <div className="flex overflow-hidden relative">
           {/* Sidebar */}
           <div className={`w-64 md:w-1/4 fixed md:relative top-0 left-0 h-full bg-black transform ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300 ease-in-out z-50`}>
             <header className="p-5 flex justify-between items-center text-white text-center">
@@ -315,6 +314,7 @@ export default function Chats() {
             </footer>
           </div>
         </div>
+      </div>
 
       {showCompose && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center">
