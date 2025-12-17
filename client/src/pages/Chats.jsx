@@ -154,13 +154,15 @@ export default function Chats() {
     }
   }
 
-  // If a chat is currently selected, re-fetch chat history every 5 seconds to simulate real-time updates
+  // If a chat is currently selected, re-fetch chat history every 10 seconds to simulate real-time updates
   useEffect(() => {
     let interval;
     if (currentChat && recipientId) {
       interval = setInterval(() => {
-        fetchChatHistory(recipientId);
-      }, 2000);
+        if (document.hasFocus()) {
+          fetchChatHistory(recipientId);
+        }
+      }, 5000);
     }
 
     return () => clearInterval(interval);
