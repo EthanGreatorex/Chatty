@@ -34,9 +34,6 @@ export default function Home() {
           <h3 className="text-neutral-500 text-2xl mb-6">
             Login or Register to start chatting!
           </h3>{" "}
-          <h3 className="text-neutral-500 text-2xl mb-6">
-            Currently not working due to free hosting restrictions!
-          </h3>{" "}
           <button className="btn" onClick={() => setShowForm(true)}>
             Get Started
           </button>
