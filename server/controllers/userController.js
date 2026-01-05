@@ -45,6 +45,19 @@ export async function login(req, res) {
   res.json({ token, id: user.id });
 }
 
+// delete a user
+export async function deleteUser(req, res) {
+  // extract the user's id from the parameters
+  const userId = parseInt(req.params.id, 10); // 10 means base 10
+  // find the user by id
+  const deletedUser = await prisma.user.delete({ where: { id } });
+  if (!deletedUser)
+    return res.status(400).json({ deleted: false, msg: "User not found " });
+  else {
+    res.json({ deleted: true });
+  }
+}
+
 // get user profile
 export async function getProfile(req, res) {
   const userId = parseInt(req.params.id, 10);

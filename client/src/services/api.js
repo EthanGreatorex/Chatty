@@ -36,6 +36,22 @@ export async function registerUser(details) {
   }
 }
 
+// Delete a user
+export async function deleteUser(token, id) {
+  try {
+    const response = await fetch(`${API_BASE}/api/users//delete/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error", error);
+  }
+}
+
 // Get user details
 export async function getUserDetails(token, id) {
   try {
@@ -55,13 +71,16 @@ export async function getUserDetails(token, id) {
 // Get user by ID
 export async function getUserById(token, id) {
   try {
-    const response = await fetch(`https://chatty-production-9838.up.railway.app/api/users/me/${id}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await fetch(
+      `https://chatty-production-9838.up.railway.app/api/users/me/${id}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return await response.json();
   } catch (error) {
     console.error("Error", error);
