@@ -15,8 +15,8 @@ app.use(passport.initialize());
 // Configure middleware
 app.use(
   cors({
-    // origin: "https://chatty-green-eight.vercel.app" || "http://localhost:5173",
-    origin: "http://localhost:5173",
+    origin: "https://chatty-green-eight.vercel.app" || "http://localhost:5173",
+    // origin: "http://localhost:5173",
     credentials: true,
   })
 );
