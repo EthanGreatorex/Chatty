@@ -92,7 +92,6 @@ export default function Chats() {
           };
         });
         setRecentChats(chats);
-        console.log(chats);
       } catch (error) {
         console.error("Error fetching user messages:", error);
       }
