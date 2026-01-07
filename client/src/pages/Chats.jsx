@@ -59,7 +59,7 @@ export default function Chats() {
           ),
         ];
 
-        // Fetch user details for each other UID if not already in map
+        // Fetch user details for each other UID
         const newUserMap = { ...userMap };
         const fetchPromises = otherUIDs.map(async (uid) => {
           if (!newUserMap[uid]) {
@@ -92,6 +92,7 @@ export default function Chats() {
           };
         });
         setRecentChats(chats);
+        console.log(chats);
       } catch (error) {
         console.error("Error fetching user messages:", error);
       }
@@ -299,6 +300,20 @@ export default function Chats() {
               >
                 <GiHamburgerMenu size={24} />
               </button>
+              {/* get the recipients profile picture based on the recipient ID */}
+              {recentChats.find((chat) => chat.userId === recipientId) && (
+                <img
+                  src={
+                    recentChats.find((chat) => chat.userId === recipientId)
+                      .profilePicture
+                      ? recentChats.find((chat) => chat.userId === recipientId)
+                          .profilePicture
+                      : "https://placehold.co/200x/FFFFFF/000000.svg?text=(•_•)&font=Lato"
+                  }
+                  alt="Recipient Avatar"
+                  className="w-12 h-12 rounded-full"
+                />
+              )}
               <h1 className="text-2xl font-semibold text-neutral-100">
                 {currentChat ? currentChat.name : "Select a chat"}
               </h1>
