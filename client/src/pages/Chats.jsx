@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, use } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoClose } from "react-icons/io5";
 import {
@@ -18,6 +18,8 @@ export default function Chats() {
   const [currentChat, setCurrentChat] = useState(null);
   const [messageText, setMessageText] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
+  // I'm tracking the previous length to determine if any new messages have arrived. if so, I will scroll down the user's chat view. This was to prevent the viewport from scrolling dowm unnecessarily if the user was trying to read previous messages.
+  const [prevChatHistoryLength, setPrevChatHistoryLength] = useState(0);
   const [recentChats, setRecentChats] = useState([]);
   const [userMap, setUserMap] = useState({});
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -31,65 +33,81 @@ export default function Chats() {
     }
   }, []);
 
-  // On page load, fetch the user's messages, this will allow us to display recent chats
-  useEffect(() => {
-    async function fetchUserMessages() {
-      const token = localStorage.getItem("token");
-      const id = localStorage.getItem("id");
+  // This is the function used to fetch user messages and update recent chats
+  async function fetchUserMessages() {
+    console.log("Fetching user messages");
+    const token = localStorage.getItem("token");
+    const id = localStorage.getItem("id");
 
-      if (token && id) {
-        try {
-          const userMessages = await getUserMessages(token, id);
-          // Process messages to get unique other UIDs
-          const myId = parseInt(id);
-          const otherUIDs = [
-            ...new Set(
-              userMessages
-                .map((msg) => (msg.fromUID === myId ? msg.toUID : msg.fromUID))
-                .filter((uid) => uid !== myId)
-            ),
-          ];
+    if (token && id) {
+      try {
+        const userMessages = await getUserMessages(token, id);
+        // Process messages to get unique other UIDs
+        const myId = parseInt(id);
+        const otherUIDs = [
+          ...new Set(
+            userMessages
+              .map((msg) => (msg.fromUID === myId ? msg.toUID : msg.fromUID))
+              .filter((uid) => uid !== myId)
+          ),
+        ];
 
-          // Fetch user details for each other UID if not already in map
-          const newUserMap = { ...userMap };
-          const fetchPromises = otherUIDs.map(async (uid) => {
-            if (!newUserMap[uid]) {
-              const userDetails = await getUserById(token, uid);
-              if (userDetails) {
-                newUserMap[uid] = userDetails;
-              }
+        // Fetch user details for each other UID if not already in map
+        const newUserMap = { ...userMap };
+        const fetchPromises = otherUIDs.map(async (uid) => {
+          if (!newUserMap[uid]) {
+            const userDetails = await getUserById(token, uid);
+            if (userDetails) {
+              newUserMap[uid] = userDetails;
             }
-          });
-          await Promise.all(fetchPromises);
-          setUserMap(newUserMap);
+          }
+        });
+        await Promise.all(fetchPromises);
+        setUserMap(newUserMap);
 
-          // Create recent chats
-          const chats = otherUIDs.map((uid) => {
-            const messagesWithUser = userMessages.filter(
-              (msg) =>
-                (msg.fromUID === myId && msg.toUID === uid) ||
-                (msg.fromUID === uid && msg.toUID === myId)
-            );
-            const lastMsg = messagesWithUser.sort(
-              (a, b) => new Date(b.sentDt) - new Date(a.sentDt)
-            )[0];
-            return {
-              userId: uid,
-              username: newUserMap[uid]?.username || "Unknown",
-              email: newUserMap[uid]?.email || "",
-              profilePicture: newUserMap[uid]?.profilePicture,
-              lastMessage: lastMsg?.messageText || "",
-              lastMessageTime: lastMsg?.sentDt || "",
-            };
-          });
-          setRecentChats(chats);
-        } catch (error) {
-          console.error("Error fetching user messages:", error);
-        }
+        // Create recent chats
+        const chats = otherUIDs.map((uid) => {
+          const messagesWithUser = userMessages.filter(
+            (msg) =>
+              (msg.fromUID === myId && msg.toUID === uid) ||
+              (msg.fromUID === uid && msg.toUID === myId)
+          );
+          const lastMsg = messagesWithUser.sort(
+            (a, b) => new Date(b.sentDt) - new Date(a.sentDt)
+          )[0];
+          return {
+            userId: uid,
+            username: newUserMap[uid]?.username || "Unknown",
+            email: newUserMap[uid]?.email || "",
+            profilePicture: newUserMap[uid]?.profilePicture,
+            lastMessage: lastMsg?.messageText || "",
+            lastMessageTime: lastMsg?.sentDt || "",
+          };
+        });
+        setRecentChats(chats);
+      } catch (error) {
+        console.error("Error fetching user messages:", error);
       }
     }
-    fetchUserMessages();
-  }, [userMap]);
+  }
+
+  // This will fetch the user messages only on page load once, the function below will handle periodic fetching
+  useEffect(() => {
+    async function initializeMessages() {
+      await fetchUserMessages();
+    }
+    initializeMessages();
+  }, []);
+
+  // This will fetch the user's messesages every 10 seconds
+  // Only allow this to run every 10 seconds to avoid spamming the ap
+  useEffect(() => {
+    let interval = setInterval(() => {
+      fetchUserMessages();
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, []); // adding userMap to the dependencies was causing an infinite loop of calls to the api
 
   // Open compose modal
   function openCompose() {
@@ -147,6 +165,7 @@ export default function Chats() {
     try {
       sendMessage(token, messageData);
       setMessageText("");
+      setPrevChatHistoryLength(chatHistory.length);
       // Refresh chat history
       fetchChatHistory(recipientId);
     } catch (error) {
@@ -159,30 +178,41 @@ export default function Chats() {
     let interval;
     if (currentChat && recipientId) {
       interval = setInterval(() => {
+        setPrevChatHistoryLength(chatHistory.length);
         fetchChatHistory(recipientId);
-      }, 5000);
+      }, 2500);
     }
 
     return () => clearInterval(interval);
-  }, [currentChat, recipientId]);
+  }, [currentChat, recipientId, chatHistory.length]);
 
   // Auto scroll to bottom of chat on new message
   useEffect(() => {
+    if (chatHistory.length === prevChatHistoryLength) {
+      return;
+    }
     const chatContainer = document.querySelector(".chat-container");
     if (chatContainer) {
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
-  }, [chatHistory]);
+  }, [chatHistory, prevChatHistoryLength]);
 
   return (
     <>
       <div className="main flex flex-col h-screen">
         <div className="flex overflow-hidden relative">
           {/* Sidebar */}
-          <div className={`w-64 md:w-1/4 fixed md:relative top-0 left-0 h-full bg-black transform ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300 ease-in-out z-50`}>
+          <div
+            className={`w-64 md:w-1/4 fixed md:relative top-0 left-0 h-full bg-black transform ${
+              isMenuOpen ? "translate-x-0" : "-translate-x-full"
+            } md:translate-x-0 transition-transform duration-300 ease-in-out z-50`}
+          >
             <header className="p-5 flex justify-between items-center text-white text-center">
               <h1 className="text-2xl font-semibold text-white">Chatty</h1>
-              <button onClick={() => setIsMenuOpen(false)} className="md:hidden text-white">
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="md:hidden text-white"
+              >
                 <IoClose size={24} />
               </button>
             </header>
@@ -236,12 +266,20 @@ export default function Chats() {
           </div>
 
           {/* Backdrop for mobile menu */}
-          {isMenuOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setIsMenuOpen(false)}></div>}
+          {isMenuOpen && (
+            <div
+              className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+              onClick={() => setIsMenuOpen(false)}
+            ></div>
+          )}
 
           {/* Main chat area */}
           <div className="flex-1 w-full md:w-auto">
             <header className="p-4 text-gray-900 flex items-center justify-between gap-4">
-              <button onClick={() => setIsMenuOpen(true)} className="md:hidden text-white mr-2">
+              <button
+                onClick={() => setIsMenuOpen(true)}
+                className="md:hidden text-white mr-2"
+              >
                 <GiHamburgerMenu size={24} />
               </button>
               <h1 className="text-2xl font-semibold text-neutral-100">
@@ -300,6 +338,7 @@ export default function Chats() {
                   }
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSend()}
                   disabled={!currentChat}
                   className="w-full bg-transparent  p-2 rounded-md focus:outline-none focus:border-orange-500 text-white"
                 />
