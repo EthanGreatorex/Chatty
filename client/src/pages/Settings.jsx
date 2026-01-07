@@ -1,5 +1,10 @@
 import "./Settings.css";
-import { getUserDetails, deleteUser, updateUserDetails } from "../services/api";
+import {
+  getUserDetails,
+  deleteUser,
+  updateUserDetails,
+  checkUsernameExists,
+} from "../services/api";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -77,6 +82,14 @@ export default function Settings() {
       const token = localStorage.getItem("token");
       const userId = localStorage.getItem("id");
       let username = document.querySelector('input[type="text"]').value;
+
+      // Check to see if the username already exists
+      const response = await checkUsernameExists(username);
+      if (response.exists === false) {
+        alert("Username already exists. Please choose a different one.");
+        return;
+      }
+
       if (username.trim() === "") {
         username = userDetails.username;
       }
