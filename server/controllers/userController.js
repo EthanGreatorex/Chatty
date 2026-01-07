@@ -98,7 +98,7 @@ export async function getProfile(req, res) {
 export async function userExists(req, res) {
   const username = req.params.username;
   const user = await prisma.user.findUnique({ where: { username: username } });
-  // Return true if user exists, fal  se otherwise
+  // Return true if user exists, false otherwise
   const exists = user ? true : false;
   // If the user exists, also return their id
   res.json({ exists, id: user ? user.id : null });

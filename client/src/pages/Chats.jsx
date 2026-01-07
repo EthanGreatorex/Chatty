@@ -43,7 +43,6 @@ export default function Chats() {
 
   // This is the function used to fetch user messages and update recent chats
   const fetchUserMessages = useCallback(async () => {
-    console.log("Fetching user messages");
     const token = localStorage.getItem("token");
     const id = localStorage.getItem("id");
 

@@ -70,7 +70,6 @@ export default function AccountForm({ onBack = () => {} }) {
       try {
         const response = await loginUser({ username, email, password });
 
-        console.log("Login response:", response);
         if (response.msg) {
           alert("Incorrect email or password");
           return;
