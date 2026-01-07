@@ -13,7 +13,7 @@ export default function Home() {
   }
   return (
     <>
-      <div className="main flex flex-col justify-center items-center h-screen bg-white">
+      <div className="main flex flex-col justify-center items-center h-screen bg-black">
         <div className="hero text-center">
           <div className="flex justify-center gap-4 mt-4">
             <FaGithub

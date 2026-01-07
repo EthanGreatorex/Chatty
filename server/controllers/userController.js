@@ -49,13 +49,42 @@ export async function login(req, res) {
 export async function deleteUser(req, res) {
   // extract the user's id from the parameters
   const userId = parseInt(req.params.id, 10); // 10 means base 10
-  // find the user by id
-  const deletedUser = await prisma.user.delete({ where: { id } });
-  if (!deletedUser)
-    return res.status(400).json({ deleted: false, msg: "User not found " });
-  else {
+
+  try {
+    // Use a transaction to delete messages and user atomically
+    await prisma.$transaction(async (tx) => {
+      // Delete all messages sent by the user
+      await tx.message.deleteMany({
+        where: { fromUID: userId },
+      });
+
+      // Delete all messages received by the user
+      await tx.message.deleteMany({
+        where: { toUID: userId },
+      });
+
+      // Delete the user
+      await tx.user.delete({
+        where: { id: userId },
+      });
+    });
+
     res.json({ deleted: true });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ deleted: false, msg: "Failed to delete user" });
   }
+}
+
+// update user details
+export async function updateUserDetails(req, res) {
+  const userId = parseInt(req.params.id, 10);
+  const { username, profilePicture } = req.body;
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: { username, profilePicture },
+  });
+  res.json(updatedUser);
 }
 
 // get user profile

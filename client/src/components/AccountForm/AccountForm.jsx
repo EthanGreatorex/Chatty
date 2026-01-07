@@ -69,7 +69,12 @@ export default function AccountForm({ onBack = () => {} }) {
       // Login an existing user
       try {
         const response = await loginUser({ username, email, password });
-        // Store the token in local storage
+
+        console.log("Login response:", response);
+        if (response.msg) {
+          alert("Incorrect email or password");
+          return;
+        }
         if (response.token) {
           localStorage.setItem("token", response.token);
         }
