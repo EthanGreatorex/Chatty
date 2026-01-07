@@ -1,6 +1,8 @@
-import { useEffect, useState, useRef, use } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
+import { useNavigate } from "react-router-dom";
 import { IoClose } from "react-icons/io5";
+import { IoMdSettings } from "react-icons/io";
 import {
   getUserMessages,
   checkUsernameExists,
@@ -24,6 +26,12 @@ export default function Chats() {
   const [userMap, setUserMap] = useState({});
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const navigate = useNavigate();
+
+  function navigateToSettings() {
+    navigate("/settings");
+  }
+
   // On page load, if the user is not logged in, redirect to the home page
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -34,7 +42,7 @@ export default function Chats() {
   }, []);
 
   // This is the function used to fetch user messages and update recent chats
-  async function fetchUserMessages() {
+  const fetchUserMessages = useCallback(async () => {
     console.log("Fetching user messages");
     const token = localStorage.getItem("token");
     const id = localStorage.getItem("id");
@@ -89,7 +97,7 @@ export default function Chats() {
         console.error("Error fetching user messages:", error);
       }
     }
-  }
+  }, [userMap]);
 
   // This will fetch the user messages only on page load once, the function below will handle periodic fetching
   useEffect(() => {
@@ -97,7 +105,7 @@ export default function Chats() {
       await fetchUserMessages();
     }
     initializeMessages();
-  }, []);
+  }, []); // Using fetchUserMessages as a dependency is causing inifinite loops
 
   // This will fetch the user's messesages every 10 seconds
   // Only allow this to run every 10 seconds to avoid spamming the ap
@@ -107,7 +115,7 @@ export default function Chats() {
     }, 10000);
 
     return () => clearInterval(interval);
-  }, []); // adding userMap to the dependencies was causing an infinite loop of calls to the api
+  }, []); // Using fetchUserMessages as a dependency is causing inifinite loops
 
   // Open compose modal
   function openCompose() {
@@ -199,7 +207,7 @@ export default function Chats() {
 
   return (
     <>
-      <div className="main flex flex-col h-screen">
+      <div className="main flex flex-col h-screen bg-black">
         <div className="flex overflow-hidden relative">
           {/* Sidebar */}
           <div
@@ -220,6 +228,16 @@ export default function Chats() {
             <div className="overflow-y-auto h-screen p-3 mb-9 pb-20">
               <div className="flex items-center mb-4 cursor-pointer p-2 rounded-md">
                 <div className="flex-1">
+                  {/* Settings */}
+                  <div className="mb-5">
+                    <p
+                      className="mb-5 text-white cursor-pointer "
+                      onClick={navigateToSettings}
+                    >
+                      <IoMdSettings className="text-xl" />
+                    </p>
+                  </div>
+                  {/* Recent chats */}
                   <div className="text-neutral-200 font-medium mb-1">
                     Recent Chats
                   </div>

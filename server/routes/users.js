@@ -4,7 +4,7 @@ import passport from "../passportConfig.js";
 
 const router = express.Router();
 
-// User registration, deletion and login routes
+// User registration, deletion, update and login routes
 // Authenticate user for protected routes
 router.post("/register", userController.register);
 router.post("/login", userController.login);
@@ -17,6 +17,11 @@ router.delete(
   "/delete/:id",
   passport.authenticate("jwt", { session: false }),
   userController.deleteUser
+);
+router.put(
+  "/update/:id",
+  passport.authenticate("jwt", { session: false }),
+  userController.updateUserDetails
 );
 router.post("/exists/:username", userController.userExists);
 

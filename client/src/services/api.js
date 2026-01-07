@@ -40,7 +40,7 @@ export async function registerUser(details) {
 // Delete a user
 export async function deleteUser(token, id) {
   try {
-    const response = await fetch(`${API_BASE}/api/users//delete/${id}`, {
+    const response = await fetch(`${API_BASE}/api/users/delete/${id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -53,6 +53,22 @@ export async function deleteUser(token, id) {
   }
 }
 
+// Update user details
+export async function updateUserDetails(token, id, updatedDetails) {
+  try {
+    const response = await fetch(`${API_BASE}/api/users/update/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(updatedDetails),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error", error);
+  }
+}
 // Get user details
 export async function getUserDetails(token, id) {
   console.log("getUserDetails called");
