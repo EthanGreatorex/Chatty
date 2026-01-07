@@ -18,7 +18,6 @@ export default function Settings() {
       const userId = localStorage.getItem("id");
       if (token && userId) {
         const userDetails = await getUserDetails(token, userId);
-        console.log("User Details:", userDetails);
         setUserDetails(userDetails);
       }
     };
@@ -60,10 +59,8 @@ export default function Settings() {
     const token = localStorage.getItem("token");
     const userId = localStorage.getItem("id");
     try {
-      console.log(userId);
-      const response = await deleteUser(token, userId);
+      await deleteUser(token, userId);
 
-      console.log("Delete Response:", response);
       // Clear local storage and redirect to home page
       localStorage.clear();
       window.location.href = "/";
@@ -77,7 +74,6 @@ export default function Settings() {
     if (choice === "cancel") {
       navigate("/chats");
     } else if (choice === "save") {
-      console.log("saving...");
       const token = localStorage.getItem("token");
       const userId = localStorage.getItem("id");
       let username = document.querySelector('input[type="text"]').value;
@@ -88,8 +84,7 @@ export default function Settings() {
         username,
         profilePicture: (profilePicture || userDetails.profilePicture).trim(),
       };
-      const response = await updateUserDetails(token, userId, updatedDetails);
-      console.log("Update Response:", response);
+      await updateUserDetails(token, userId, updatedDetails);
       navigate("/chats");
     }
   }
