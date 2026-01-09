@@ -45,12 +45,6 @@ export default function AccountForm({ onBack = () => {} }) {
   async function handleSubmit(e) {
     e.preventDefault();
     if (isRegister) {
-      // Check to see if the username already exists
-      const response = await checkUsernameExists(username);
-      if (response.exists === false) {
-        alert("Username already exists. Please choose a different one.");
-        return;
-      }
       // Register a new user
       try {
         const response = await registerUser({

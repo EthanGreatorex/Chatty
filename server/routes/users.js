@@ -23,6 +23,6 @@ router.put(
   passport.authenticate("jwt", { session: false }),
   userController.updateUserDetails
 );
-router.post("/exists/:username", userController.userExists);
+router.post("/exists/:username", passport.authenticate("jwt", { session: false }), userController.userExists);
 
 export default router;
