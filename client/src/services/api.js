@@ -156,12 +156,13 @@ export async function sendMessage(token, messageData) {
 }
 
 // check to see if a username exists
-export async function checkUsernameExists(username) {
+export async function checkUsernameExists(username, token) {
   try {
     const response = await fetch(`${API_BASE}/api/users/exists/${username}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
     });
     return await response.json();
