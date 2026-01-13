@@ -1,7 +1,7 @@
 // This file contains all the services related to API calls
 
-const API_BASE = "https://chatty-production-9838.up.railway.app";
-// const API_BASE = "http://localhost:3000";
+// const API_BASE = "https://chatty-production-9838.up.railway.app";
+const API_BASE = "http://localhost:3000";
 
 // Login a user
 // details will include an email and password
@@ -33,7 +33,7 @@ export async function registerUser(details) {
     });
     return await response.json();
   } catch (error) {
-    console.error("Error", error);
+    alert("Error", error);
   }
 }
 
@@ -79,9 +79,14 @@ export async function getUserDetails(token, id) {
         Authorization: `Bearer ${token}`,
       },
     });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+    }
     return await response.json();
   } catch (error) {
-    console.error("Error", error);
+    console.error("Error fetching user details:", error);
+    throw error;
   }
 }
 
@@ -168,5 +173,6 @@ export async function checkUsernameExists(username, token) {
     return await response.json();
   } catch (error) {
     console.error("Error", error);
+    return {exists: false}
   }
 }

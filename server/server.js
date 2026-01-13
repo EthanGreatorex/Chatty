@@ -15,8 +15,8 @@ app.use(passport.initialize());
 // Configure middleware
 app.use(
   cors({
-    origin: "https://chatty-green-eight.vercel.app" || "http://localhost:5173",
-    // origin: "http://localhost:5173",
+    // origin: "https://chatty-green-eight.vercel.app" || "http://localhost:5173",
+    origin: "http://localhost:5173",
     credentials: true,
   })
 );
@@ -25,7 +25,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/users", userRoutes);
 app.use("/api/messages", messageRoutes);
-app.use(passport.initialize());
+
+// Error handling middleware for authentication failures
+app.use((err, req, res, next) => {
+  if (err.name === "UnauthorizedError") {
+    return res.status(401).json({ error: "Unauthorized", message: err.message });
+  }
+  next(err);
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: "Not found" });
+});
 
 // Start the server
 app.listen(PORT, () => {

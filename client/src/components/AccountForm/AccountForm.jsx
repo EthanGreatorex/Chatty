@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./styles.css";
 import { registerUser, loginUser } from "../../services/api";
 import { useNavigate } from "react-router-dom";
-import { checkUsernameExists } from "../../services/api";
+
 
 export default function AccountForm({ onBack = () => {} }) {
   const [isRegister, setIsRegister] = useState(true);
