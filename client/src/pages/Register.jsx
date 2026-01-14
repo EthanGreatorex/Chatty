@@ -5,8 +5,8 @@ import { registerUser } from "../services/api";
 export default function AccountForm() {
   const [profilePicture, setProfilePicture] = useState("");
 
-//   const IMG_API_KEY = "7d793a7ba60c9baf15a0b08e0c1a1ee0";
-    const IMG_API_KEY = import.meta.env.VITE_IMG_API_KEY
+  //   const IMG_API_KEY = "7d793a7ba60c9baf15a0b08e0c1a1ee0";
+  const IMG_API_KEY = import.meta.env.VITE_IMG_API_KEY;
 
   async function handleFileChange(e) {
     const file = e.target.files[0];
@@ -56,10 +56,7 @@ export default function AccountForm() {
         alert("User already exists");
         return;
       }
-      // Store the token in local storage
-      if (response.token) {
-        localStorage.setItem("token", response.token);
-      }
+
       // Store the user id in local storage
       if (response.id) {
         localStorage.setItem("id", response.id);

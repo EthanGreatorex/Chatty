@@ -25,25 +25,21 @@ export default function Chats() {
   const [userMap, setUserMap] = useState({});
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-
-
   // On page load, if the user is not logged in, redirect to the home page
   useEffect(() => {
-    const token = localStorage.getItem("token");
     const id = localStorage.getItem("id");
-    if (!token || !id) {
+    if (!id) {
       window.location.href = "/";
     }
   }, []);
 
   // This is the function used to fetch user messages and update recent chats
   const fetchUserMessages = useCallback(async () => {
-    const token = localStorage.getItem("token");
     const id = localStorage.getItem("id");
 
-    if (token && id) {
+    if (id) {
       try {
-        const userMessages = await getUserMessages(token, id);
+        const userMessages = await getUserMessages(id);
         // Process messages to get unique other UIDs
         const myId = parseInt(id);
         const otherUIDs = [
@@ -58,7 +54,7 @@ export default function Chats() {
         const newUserMap = { ...userMap };
         const fetchPromises = otherUIDs.map(async (uid) => {
           if (!newUserMap[uid]) {
-            const userDetails = await getUserById(token, uid);
+            const userDetails = await getUserById(uid);
             if (userDetails) {
               newUserMap[uid] = userDetails;
             }
@@ -119,11 +115,8 @@ export default function Chats() {
 
   // Start a fresh chat with the provided username
   async function startChatWithUsername() {
-    // get the user token
-    const token = localStorage.getItem("token");
     // check to see if username exists in the system
-
-    const usernameExists = await checkUsernameExists(composeUsername, token);
+    const usernameExists = await checkUsernameExists(composeUsername);
 
     if (!usernameExists.exists) {
       alert("Username does not exist!");
@@ -147,10 +140,9 @@ export default function Chats() {
 
   // Function to fetch chat history with a specific user
   async function fetchChatHistory(recipientId) {
-    const token = localStorage.getItem("token");
     const id = localStorage.getItem("id");
     try {
-      const messages = await getMessagesBetweenUsers(token, id, recipientId);
+      const messages = await getMessagesBetweenUsers(id, recipientId);
       setChatHistory(messages);
     } catch (error) {
       console.error("Error fetching chat history:", error);
@@ -159,14 +151,13 @@ export default function Chats() {
 
   // Send message for current chat
   async function handleSend() {
-    const token = localStorage.getItem("token");
     const messageData = {
       fromUID: parseInt(localStorage.getItem("id")),
       toUID: recipientId,
       messageText: messageText,
     };
     try {
-      sendMessage(token, messageData);
+      sendMessage(messageData);
       setMessageText("");
       setPrevChatHistoryLength(chatHistory.length);
       // Refresh chat history
@@ -227,7 +218,7 @@ export default function Chats() {
                   <div className="mb-5">
                     <p
                       className="mb-5 text-white cursor-pointer "
-                      onClick={() => window.location.href = "/settings"}
+                      onClick={() => (window.location.href = "/settings")}
                     >
                       <IoMdSettings className="text-xl" />
                     </p>

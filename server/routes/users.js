@@ -1,22 +1,8 @@
 import express from "express";
 import * as userController from "../controllers/userController.js";
-import passport from "../passportConfig.js";
+import { authenticateJWT } from "../middleware/auth.js";
 
 const router = express.Router();
-
-// Middleware to handle passport authentication errors
-const authenticateJWT = (req, res, next) => {
-  passport.authenticate("jwt", { session: false }, (err, user, info) => {
-    if (err) {
-      return res.status(500).json({ error: "Server error", message: err.message });
-    }
-    if (!user) {
-      return res.status(401).json({ error: "Unauthorized", message: info?.message || "Invalid token" });
-    }
-    req.user = user;
-    next();
-  })(req, res, next);
-};
 
 // User registration, deletion, update and login routes
 // Authenticate user for protected routes
