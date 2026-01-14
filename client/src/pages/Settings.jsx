@@ -21,13 +21,27 @@ export default function Settings() {
     const fetchUserDetails = async () => {
       const token = localStorage.getItem("token");
       const userId = localStorage.getItem("id");
-      if (token && userId) {
+      if (!token || !userId) {
+        navigate("/");
+        return;
+      }
+      try {
         const userDetails = await getUserDetails(token, userId);
         setUserDetails(userDetails);
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+        // If authentication fails, redirect to home
+        if (
+          error.message.includes("401") ||
+          error.message.includes("Unauthorized")
+        ) {
+          localStorage.clear();
+          navigate("/");
+        }
       }
     };
     fetchUserDetails();
-  }, []);
+  }, [navigate]);
 
   // This will handle profile picture uploads
 
@@ -76,29 +90,45 @@ export default function Settings() {
 
   // Handle the cancel or save changes option, choice is either 'cancel' or 'save'
   async function handleChoice(choice) {
+    var isValidUpdate = true;
     if (choice === "cancel") {
       navigate("/chats");
     } else if (choice === "save") {
-      const token = localStorage.getItem("token");
-      const userId = localStorage.getItem("id");
-      let username = document.querySelector('input[type="text"]').value;
-
-      // Check to see if the username already exists
-      const response = await checkUsernameExists(username);
-      if (response.exists === false) {
-        alert("Username already exists. Please choose a different one.");
+      if (!userDetails) {
+        alert(
+          "User details are still loading. Please wait a moment and try again."
+        );
         return;
       }
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("id");
+      var username = document.querySelector('input[type="text"]').value;
 
-      if (username.trim() === "") {
-        username = userDetails.username;
+      // only if the user has entered a new username
+      if (username && username !== userDetails.username) {
+        // Check to see if the username already exists
+        const response = await checkUsernameExists(username, token);
+        if (response.exists === true) {
+          alert("Username already exists. Please choose a different one.");
+          isValidUpdate = false;
+          
+        }
+
+        if (username.trim() === "") {
+          username = userDetails.username;
+        }
       }
-      const updatedDetails = {
-        username,
-        profilePicture: (profilePicture || userDetails.profilePicture).trim(),
-      };
-      await updateUserDetails(token, userId, updatedDetails);
-      navigate("/chats");
+
+      if (isValidUpdate === false) return;
+      else {
+        const updatedDetails = {
+          username: (username || userDetails.username).trim(),
+          profilePicture: (profilePicture || userDetails.profilePicture).trim(),
+        };
+        console.log("Updated details:", updatedDetails);
+        await updateUserDetails(token, userId, updatedDetails);
+        navigate("/chats");
+      }
     }
   }
   return (

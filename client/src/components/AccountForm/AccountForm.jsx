@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./styles.css";
 import { registerUser, loginUser } from "../../services/api";
 import { useNavigate } from "react-router-dom";
-import { checkUsernameExists } from "../../services/api";
+
 
 export default function AccountForm({ onBack = () => {} }) {
   const [isRegister, setIsRegister] = useState(true);
@@ -45,12 +45,6 @@ export default function AccountForm({ onBack = () => {} }) {
   async function handleSubmit(e) {
     e.preventDefault();
     if (isRegister) {
-      // Check to see if the username already exists
-      const response = await checkUsernameExists(username);
-      if (response.exists === false) {
-        alert("Username already exists. Please choose a different one.");
-        return;
-      }
       // Register a new user
       try {
         const response = await registerUser({

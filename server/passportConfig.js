@@ -4,8 +4,7 @@ import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-const secret = process.env.JWT_SECRET;
-if (!secret) throw new Error("Missing JWT_SECRET environment variable");
+const secret = process.env.JWT_SECRET || "supersecretjwt";
 
 const options = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

@@ -124,9 +124,11 @@ export default function Chats() {
 
   // Start a fresh chat with the provided username
   async function startChatWithUsername() {
+    // get the user token
+    const token = localStorage.getItem("token");
     // check to see if username exists in the system
 
-    const usernameExists = await checkUsernameExists(composeUsername);
+    const usernameExists = await checkUsernameExists(composeUsername, token);
 
     if (!usernameExists.exists) {
       alert("Username does not exist!");
