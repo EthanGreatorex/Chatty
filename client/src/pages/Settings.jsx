@@ -125,7 +125,6 @@ export default function Settings() {
           username: (username || userDetails.username).trim(),
           profilePicture: (profilePicture || userDetails.profilePicture).trim(),
         };
-        console.log("Updated details:", updatedDetails);
         await updateUserDetails(token, userId, updatedDetails);
         navigate("/chats");
       }

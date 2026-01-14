@@ -11,21 +11,18 @@ export async function register(req, res) {
   // extract user details from request body
   const { username, email, password, profilePicture } = req.body;
 
-  console.log("Registering user:", username, email);
 
   // before creating, check if the email or username already exists
   const existingUserByEmail = await prisma.user.findUnique({
     where: { email: email },
   });
   if (existingUserByEmail) {
-    console.log("Email already in use:", email);
     return res.status(400).json({ msg: "Email already in use" });
   }
   const existingUserByUsername = await prisma.user.findUnique({
     where: { username: username },
   });
   if (existingUserByUsername) {
-    console.log("Username already in use:", username);
     return res.status(400).json({ msg: "Username already in use" });
   }
   // hash the password before storing
@@ -126,7 +123,6 @@ export async function userExists(req, res) {
   const user = await prisma.user.findUnique({ where: { username } });
   // Return true if user exists, false otherwise
   const exists = user ? true : false;
-  console.log(`User exists check for "${username}": ${exists}`);
   // If the user exists, also return their id
   res.json({ exists, id: user ? user.id : null });
 }

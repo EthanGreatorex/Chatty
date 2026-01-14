@@ -1,7 +1,7 @@
 // This file contains all the services related to API calls
 
-// const API_BASE = "https://chatty-production-9838.up.railway.app";
-const API_BASE = "http://localhost:3000";
+const API_BASE = "https://chatty-production-9838.up.railway.app";
+// const API_BASE = "http://localhost:3000";
 
 // Login a user
 // details will include an email and password

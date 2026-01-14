@@ -38,7 +38,6 @@ export default function AccountForm() {
       new FormData(e.target)
     );
 
-    console.log(username, email, password);
     if (!email || !password || !username) {
       alert("Please fill in all required fields.");
       return;
