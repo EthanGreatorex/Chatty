@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
-import { useNavigate } from "react-router-dom";
 import { IoClose } from "react-icons/io5";
 import { IoMdSettings } from "react-icons/io";
 import {
@@ -26,11 +25,7 @@ export default function Chats() {
   const [userMap, setUserMap] = useState({});
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const navigate = useNavigate();
 
-  function navigateToSettings() {
-    navigate("/settings");
-  }
 
   // On page load, if the user is not logged in, redirect to the home page
   useEffect(() => {
@@ -232,7 +227,7 @@ export default function Chats() {
                   <div className="mb-5">
                     <p
                       className="mb-5 text-white cursor-pointer "
-                      onClick={navigateToSettings}
+                      onClick={() => window.location.href = "/settings"}
                     >
                       <IoMdSettings className="text-xl" />
                     </p>
