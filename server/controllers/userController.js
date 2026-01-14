@@ -64,14 +64,17 @@ export async function login(req, res) {
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
 
-  const expiresIn = rememberMe ? "604800" : "25200";
+  const expiresInCookie = rememberMe ? "604800" : "25200";
+  const expiresInToken = rememberMe ? "7d" : "7h";
 
   // generate a JWT token for the authenticated user
-  const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn });
+  const token = jwt.sign({ id: user.id }, JWT_SECRET, {
+    expiresIn: expiresInToken,
+  });
 
   res.setHeader(
     "Set-Cookie",
-    `AuthToken=${token}; Path=/; Max-Age=${expiresIn}; SameSite=Lax; HttpOnly`
+    `AuthToken=${token}; Path=/; Max-Age=${expiresInCookie}; SameSite=Lax; HttpOnly`
   );
   // Also return the id of the user
   res.json({ id: user.id });
