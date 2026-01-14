@@ -46,7 +46,7 @@ export default function LoginForm() {
         <div className="flex-column">
           <label>Email </label>
         </div>
-        <div className="inputForm">
+        <div className="form__field">
           <svg
             height="20"
             viewBox="0 0 32 32"
@@ -70,7 +70,7 @@ export default function LoginForm() {
         <div className="flex-column">
           <label>Password </label>
         </div>
-        <div className="inputForm">
+        <div className="form__field">
           <svg
             height="20"
             viewBox="-64 0 512 512"
@@ -94,7 +94,7 @@ export default function LoginForm() {
           />
         </div>
 
-        <button className="btn form-btn" type="submit">
+        <button className="btn form__btn" type="submit">
           Login
         </button>
         <p className="p">
