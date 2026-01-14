@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../components/AccountForm/styles.css";
+import "./AccountForm.css";
 import { registerUser } from "../services/api";
 
 export default function AccountForm() {
@@ -38,7 +38,7 @@ export default function AccountForm() {
       new FormData(e.target)
     );
 
-    if (!email || !password || !username) {
+    if (!email.trim() || !password.trim() || !username.trim()) {
       alert("Please fill in all required fields.");
       return;
     }

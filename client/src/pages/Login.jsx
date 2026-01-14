@@ -1,4 +1,4 @@
-import "../components/AccountForm/styles.css";
+import "./AccountForm.css";
 import { loginUser } from "../services/api.js";
 
 export default function LoginForm() {

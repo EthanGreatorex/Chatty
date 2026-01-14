@@ -1,6 +1,6 @@
 /* From Uiverse.io by R1SH4BH81 */
 .modal-backdrop {
-  background: url("../../assets/AnimatedStars.gif");
+  background: url("../assets/AnimatedStars.gif");
   position: fixed;
   inset: 0;
   display: flex;
