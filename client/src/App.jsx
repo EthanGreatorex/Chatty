@@ -5,6 +5,8 @@ import "./index.css";
 import Home from "./pages/Home.jsx";
 import Chats from "./pages/Chats.jsx";
 import Settings from "./pages/Settings.jsx";
+import LoginForm from "./pages/Login.jsx";
+import RegisterForm from "./pages/Register.jsx";
 
 function App() {
   return (
@@ -15,6 +17,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/chats" element={<Chats />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/register" element={<RegisterForm />} />
         </Routes>
       </BrowserRouter>
     </>

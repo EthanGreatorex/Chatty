@@ -31,6 +31,9 @@ export async function registerUser(details) {
       },
       body: JSON.stringify(details),
     });
+    if (!response.ok) {
+      return {error: "User already exists"}
+    }
     return await response.json();
   } catch (error) {
     alert("Error", error);

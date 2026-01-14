@@ -34,8 +34,8 @@ export async function register(req, res) {
   // create a new user record in the database
   const user = await prisma.user.create({
     data: {
-      username: usernameToCheck,
-      email: emailToCheck,
+      username: username,
+      email: email,
       password: hash,
       profilePicture,
     },
@@ -45,6 +45,7 @@ export async function register(req, res) {
   const token = jwt.sign({ id: user.id }, JWT_SECRET, {
     expiresIn: "7h",
   });
+
   // Also return the id of the user
   res.json({ token, id: user.id });
 }
@@ -53,9 +54,9 @@ export async function register(req, res) {
 export async function login(req, res) {
   // extract login credentials from request body
   const { email, password } = req.body;
-  const emailToCheck = email.toLowerCase();
+
   // find the user by email, as email is a unique identifier
-  const user = await prisma.user.findUnique({ where: { email: emailToCheck } });
+  const user = await prisma.user.findUnique({ where: { email: email } });
   if (!user) return res.status(400).json({ msg: "User not found" });
 
   // compare the provided password with the stored hashed password
