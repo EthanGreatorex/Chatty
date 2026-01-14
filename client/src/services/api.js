@@ -31,9 +31,12 @@ export async function registerUser(details) {
       },
       body: JSON.stringify(details),
     });
+    if (!response.ok) {
+      return {error: "User already exists"}
+    }
     return await response.json();
   } catch (error) {
-    console.error("Error", error);
+    alert("Error", error);
   }
 }
 
@@ -79,9 +82,14 @@ export async function getUserDetails(token, id) {
         Authorization: `Bearer ${token}`,
       },
     });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+    }
     return await response.json();
   } catch (error) {
-    console.error("Error", error);
+    console.error("Error fetching user details:", error);
+    throw error;
   }
 }
 
@@ -168,5 +176,6 @@ export async function checkUsernameExists(username, token) {
     return await response.json();
   } catch (error) {
     console.error("Error", error);
+    return {exists: false}
   }
 }
