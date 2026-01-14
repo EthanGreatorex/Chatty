@@ -5,7 +5,9 @@ export default function LoginForm() {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    const { email, password } = Object.fromEntries(new FormData(e.target));
+    const { email, password, rememberMe } = Object.fromEntries(
+      new FormData(e.target)
+    );
     if (!email || !password) {
       alert("Please fill in all required fields.");
       return;
@@ -13,14 +15,11 @@ export default function LoginForm() {
 
     // Login an existing user
     try {
-      const response = await loginUser({ email, password });
+      const response = await loginUser({ email, password, rememberMe });
 
       if (response.msg) {
         alert("Incorrect email or password");
         return;
-      }
-      if (response.token) {
-        localStorage.setItem("token", response.token);
       }
       // Store the user id in local storage
       if (response.id) {
@@ -93,7 +92,12 @@ export default function LoginForm() {
             placeholder="Enter your Password"
           />
         </div>
-
+        <div className="form__field ">
+          <input type="checkbox" id="rememberMe" name="rememberMe" />
+          <label htmlFor="rememberMe" className="text-white ml-2">
+            Remember Me
+          </label>
+        </div>
         <button className="btn form__btn" type="submit">
           Login
         </button>

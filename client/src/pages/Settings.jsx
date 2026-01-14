@@ -19,14 +19,13 @@ export default function Settings() {
   // Fetch the user details on page load
   useEffect(() => {
     const fetchUserDetails = async () => {
-      const token = localStorage.getItem("token");
       const userId = localStorage.getItem("id");
-      if (!token || !userId) {
+      if (!userId) {
         navigate("/");
         return;
       }
       try {
-        const userDetails = await getUserDetails(token, userId);
+        const userDetails = await getUserDetails(userId);
         setUserDetails(userDetails);
       } catch (error) {
         console.error("Error fetching user details:", error);
@@ -75,10 +74,9 @@ export default function Settings() {
       "Are you sure you want to delete your account? This action cannot be undone."
     );
     if (!confirmDelete) return;
-    const token = localStorage.getItem("token");
     const userId = localStorage.getItem("id");
     try {
-      await deleteUser(token, userId);
+      await deleteUser(userId);
 
       // Clear local storage and redirect to home page
       localStorage.clear();
@@ -100,18 +98,16 @@ export default function Settings() {
         );
         return;
       }
-      const token = localStorage.getItem("token");
       const userId = localStorage.getItem("id");
       var username = document.querySelector('input[type="text"]').value;
 
       // only if the user has entered a new username
       if (username && username !== userDetails.username) {
         // Check to see if the username already exists
-        const response = await checkUsernameExists(username, token);
+        const response = await checkUsernameExists(username);
         if (response.exists === true) {
           alert("Username already exists. Please choose a different one.");
           isValidUpdate = false;
-          
         }
 
         if (username.trim() === "") {
@@ -125,7 +121,7 @@ export default function Settings() {
           username: (username || userDetails.username).trim(),
           profilePicture: (profilePicture || userDetails.profilePicture).trim(),
         };
-        await updateUserDetails(token, userId, updatedDetails);
+        await updateUserDetails(userId, updatedDetails);
         navigate("/chats");
       }
     }

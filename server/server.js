@@ -30,7 +30,9 @@ app.use("/api/messages", messageRoutes);
 // Error handling middleware for authentication failures
 app.use((err, req, res, next) => {
   if (err.name === "UnauthorizedError") {
-    return res.status(401).json({ error: "Unauthorized", message: err.message });
+    return res
+      .status(401)
+      .json({ error: "Unauthorized", message: err.message });
   }
   next(err);
 });

@@ -11,7 +11,6 @@ export async function register(req, res) {
   // extract user details from request body
   const { username, email, password, profilePicture } = req.body;
 
-
   // before creating, check if the email or username already exists
   const existingUserByEmail = await prisma.user.findUnique({
     where: { email: email },
@@ -43,14 +42,19 @@ export async function register(req, res) {
     expiresIn: "7h",
   });
 
+  res.setHeader(
+    "Set-Cookie",
+    `AuthToken=${token}; Path=/; Max-Age=25200; SameSite=Lax; HttpOnly`
+  );
+
   // Also return the id of the user
-  res.json({ token, id: user.id });
+  res.json({ id: user.id });
 }
 
 // Login a new user
 export async function login(req, res) {
   // extract login credentials from request body
-  const { email, password } = req.body;
+  const { email, password, rememberMe } = req.body;
 
   // find the user by email, as email is a unique identifier
   const user = await prisma.user.findUnique({ where: { email: email } });
@@ -60,12 +64,20 @@ export async function login(req, res) {
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
 
+  const expiresInCookie = rememberMe ? "604800" : "25200";
+  const expiresInToken = rememberMe ? "7d" : "7h";
+
   // generate a JWT token for the authenticated user
   const token = jwt.sign({ id: user.id }, JWT_SECRET, {
-    expiresIn: "7h",
+    expiresIn: expiresInToken,
   });
+
+  res.setHeader(
+    "Set-Cookie",
+    `AuthToken=${token}; Path=/; Max-Age=${expiresInCookie}; SameSite=Lax; HttpOnly`
+  );
   // Also return the id of the user
-  res.json({ token, id: user.id });
+  res.json({ id: user.id });
 }
 
 // delete a user

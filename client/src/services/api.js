@@ -12,6 +12,7 @@ export async function loginUser(details) {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify(details),
     });
     return await response.json();
@@ -29,10 +30,11 @@ export async function registerUser(details) {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify(details),
     });
     if (!response.ok) {
-      return {error: "User already exists"}
+      return { error: "User already exists" };
     }
     return await response.json();
   } catch (error) {
@@ -41,14 +43,14 @@ export async function registerUser(details) {
 }
 
 // Delete a user
-export async function deleteUser(token, id) {
+export async function deleteUser(id) {
   try {
     const response = await fetch(`${API_BASE}/api/users/delete/${id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
+      credentials: "include",
     });
     return await response.json();
   } catch (error) {
@@ -57,14 +59,14 @@ export async function deleteUser(token, id) {
 }
 
 // Update user details
-export async function updateUserDetails(token, id, updatedDetails) {
+export async function updateUserDetails(id, updatedDetails) {
   try {
     const response = await fetch(`${API_BASE}/api/users/update/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
+      credentials: "include",
       body: JSON.stringify(updatedDetails),
     });
     return await response.json();
@@ -73,18 +75,20 @@ export async function updateUserDetails(token, id, updatedDetails) {
   }
 }
 // Get user details
-export async function getUserDetails(token, id) {
+export async function getUserDetails(id) {
   try {
     const response = await fetch(`${API_BASE}/api/users/me/${id}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
+      credentials: "include",
     });
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      throw new Error(
+        errorData.message || `HTTP ${response.status}: ${response.statusText}`
+      );
     }
     return await response.json();
   } catch (error) {
@@ -94,14 +98,14 @@ export async function getUserDetails(token, id) {
 }
 
 // Get user by ID
-export async function getUserById(token, id) {
+export async function getUserById(id) {
   try {
     const response = await fetch(`${API_BASE}/api/users/me/${id}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
+      credentials: "include",
     });
     return await response.json();
   } catch (error) {
@@ -110,15 +114,14 @@ export async function getUserById(token, id) {
 }
 
 // Get user messages
-export async function getUserMessages(token, id) {
+export async function getUserMessages(id) {
   try {
     const response = await fetch(`${API_BASE}/api/messages/${id}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-
-        Authorization: `Bearer ${token}`,
       },
+      credentials: "include",
     });
     return await response.json();
   } catch (error) {
@@ -127,7 +130,7 @@ export async function getUserMessages(token, id) {
 }
 
 // Get messages between two users
-export async function getMessagesBetweenUsers(token, userOneID, userTwoID) {
+export async function getMessagesBetweenUsers(userOneID, userTwoID) {
   try {
     const response = await fetch(
       `${API_BASE}/api/messages/between/${userOneID}/${userTwoID}`,
@@ -135,8 +138,8 @@ export async function getMessagesBetweenUsers(token, userOneID, userTwoID) {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
       }
     );
     return await response.json();
@@ -146,15 +149,14 @@ export async function getMessagesBetweenUsers(token, userOneID, userTwoID) {
 }
 
 // Send a new message
-export async function sendMessage(token, messageData) {
+export async function sendMessage(messageData) {
   try {
     const response = await fetch(`${API_BASE}/api/messages/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-
-        Authorization: `Bearer ${token}`,
       },
+      credentials: "include",
       body: JSON.stringify(messageData),
     });
     return await response.json();
@@ -164,18 +166,18 @@ export async function sendMessage(token, messageData) {
 }
 
 // check to see if a username exists
-export async function checkUsernameExists(username, token) {
+export async function checkUsernameExists(username) {
   try {
     const response = await fetch(`${API_BASE}/api/users/exists/${username}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
+      credentials: "include",
     });
     return await response.json();
   } catch (error) {
     console.error("Error", error);
-    return {exists: false}
+    return { exists: false };
   }
 }
