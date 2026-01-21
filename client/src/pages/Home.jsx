@@ -24,7 +24,8 @@ export default function Home() {
           <h1 className="text-5xl text-white font-bold">Welcome to Chatty</h1>
           <Loader />
           <h3 className="text-neutral-500 text-2xl mb-6">
-            Login or Register to start chatting!
+            Application current out of service due to server costs. Sorry for the
+            inconvenience.
           </h3>{" "}
           <button
             className="btn"
