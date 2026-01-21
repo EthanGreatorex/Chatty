@@ -4,7 +4,7 @@ import cors from "cors";
 import userRoutes from "./routes/users.js";
 import messageRoutes from "./routes/messages.js";
 import passport from "./passportConfig.js";
-import { PrismaClient } from "@prisma/client";
+
 
 const app = express();
 
@@ -15,8 +15,8 @@ app.use(passport.initialize());
 // Configure middleware
 app.use(
   cors({
-    origin: "https://chatty-green-eight.vercel.app",
-    // origin: "http://localhost:5173",
+    // origin: "https://chatty-green-eight.vercel.app",
+    origin: "http://localhost:5173",
     credentials: true,
   })
 );

@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretjwt";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Register a new user
 export async function register(req, res) {
@@ -66,6 +66,7 @@ export async function login(req, res) {
 
   const expiresInCookie = rememberMe ? "604800" : "25200";
   const expiresInToken = rememberMe ? "7d" : "7h";
+
 
   // generate a JWT token for the authenticated user
   const token = jwt.sign({ id: user.id }, JWT_SECRET, {

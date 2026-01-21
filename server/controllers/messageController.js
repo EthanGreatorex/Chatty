@@ -1,5 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Get messages for a user
 export async function getMessages(req, res) {
@@ -37,5 +40,19 @@ export async function sendMessage(req, res) {
   const message = await prisma.message.create({
     data: { fromUID, toUID, messageText },
   });
+
+  // Also give the user a new cookie
+  const expiresInCookie = "25200"; // 7 hours
+  const expiresInToken = "7h"; // 7 hours
+
+  // generate a JWT token for the authenticated user
+  const token = jwt.sign({ id: fromUID }, JWT_SECRET, {
+    expiresIn: expiresInToken,
+  });
+
+  res.setHeader(
+    "Set-Cookie",
+    `AuthToken=${token}; Path=/; Max-Age=${expiresInCookie}; SameSite=Lax; HttpOnly`
+  );
   res.json(message);
 }
